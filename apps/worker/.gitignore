@@ -1,0 +1,6 @@
+
+# LINE Hive (agent temp files)
+.line-hive-tmp/
+.line-hive-preflight
+.github/instructions/line-notification.instructions.md
+.claude/rules/line-notification.md
