@@ -249,5 +249,12 @@ export async function generateArticle(
 
   const slug = extractSlug(cleaned, input.date);
 
-  return { markdown: cleaned, slug };
+  // フロントマターの slug フィールドを date-prefixed に更新
+  // これにより Astro が生成する URL と worker が報告する URL が一致する
+  const updatedMarkdown = cleaned.replace(
+    /^(slug:\s*)["']?[^"'\n]+["']?/m,
+    `$1"${slug}"`
+  );
+
+  return { markdown: updatedMarkdown, slug };
 }
