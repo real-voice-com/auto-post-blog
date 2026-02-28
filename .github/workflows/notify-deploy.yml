@@ -1,0 +1,23 @@
+name: Deploy Notify
+on:
+  deployment_status:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord通知
+        run: |
+          STATE="${{ github.event.deployment_status.state }}"
+          if [ "$STATE" = "success" ]; then
+            COLOR=3066993
+            ICON="✅"
+          elif [ "$STATE" = "failure" ] || [ "$STATE" = "error" ]; then
+            COLOR=15158332
+            ICON="❌"
+          else
+            exit 0
+          fi
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"$ICON Deploy $STATE\", \"description\": \"**${{ github.repository }}**\", \"color\": $COLOR, \"fields\": [{\"name\": \"Environment\", \"value\": \"${{ github.event.deployment.environment }}\", \"inline\": true}]}]}"
