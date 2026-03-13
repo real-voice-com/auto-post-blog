@@ -232,19 +232,31 @@ document.body.addEventListener("htmx:afterRequest", function (event) {
 const MAX_IMAGE_SIZE = 400 * 1024; // 400KB per image (reduced for AI model limits)
 const MAX_DIMENSION = 1600; // Max width/height
 
+// Keep track of compressed files across selections/deletions
+let currentCompressedFiles = [];
+
+function updateInputFiles() {
+  const inputEl = document.getElementById("images");
+  const dataTransfer = new DataTransfer();
+  currentCompressedFiles.forEach((file) => {
+    if (file !== null) dataTransfer.items.add(file);
+  });
+  inputEl.files = dataTransfer.files;
+}
+
 document.getElementById("images").addEventListener("change", async function (e) {
   const files = Array.from(e.target.files);
   const preview = document.getElementById("image-preview");
   preview.innerHTML = "";
+  currentCompressedFiles = [];
 
   if (files.length === 0) return;
-
-  const compressedFiles = [];
 
   for (const file of files) {
     try {
       const compressed = await compressImage(file);
-      compressedFiles.push(compressed);
+      const index = currentCompressedFiles.length;
+      currentCompressedFiles.push(compressed);
 
       const item = document.createElement("div");
       item.className = "preview-item";
@@ -280,8 +292,20 @@ document.getElementById("images").addEventListener("change", async function (e) 
             formatFileSize(compressed.size) +
             ")");
 
+      // Delete button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "btn-remove preview-delete";
+      deleteBtn.textContent = "✕ 削除";
+      deleteBtn.addEventListener("click", function () {
+        currentCompressedFiles[index] = null;
+        item.remove();
+        updateInputFiles();
+      });
+
       item.appendChild(img);
       item.appendChild(info);
+      item.appendChild(deleteBtn);
       preview.appendChild(item);
     } catch (err) {
       console.error("Image compression failed:", err);
@@ -290,9 +314,7 @@ document.getElementById("images").addEventListener("change", async function (e) 
   }
 
   // Replace file input with compressed files
-  const dataTransfer = new DataTransfer();
-  compressedFiles.forEach((file) => dataTransfer.items.add(file));
-  e.target.files = dataTransfer.files;
+  updateInputFiles();
 });
 
 async function compressImage(file) {
