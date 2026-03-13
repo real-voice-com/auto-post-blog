@@ -94,7 +94,8 @@ totalCost: 合計金額(数値)
   - 画像から読み取れる情報を記事に盛り込むこと
 - 費用明細はユーザー入力をそのままテーブルに配置すること
 - frontmatterのimageは最初の画像のパスを設定すること（画像がない場合は省略）
-- Markdown以外のテキストは出力しないこと（説明文や前置きは不要）`;
+- Markdown以外のテキストは出力しないこと（説明文や前置きは不要）
+- インタビューの補足情報が提供された場合、Q&A形式・「質問への回答」などの見出し・フォーマットを記事内に一切含めないこと。あくまで記事の品質を高める参考情報として自然な文体に溶け込ませること`;
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -130,7 +131,7 @@ function buildUserContent(
 
   const interviewText =
     input.interviewAnswers && input.interviewAnswers.length > 0
-      ? `\n\n## 追加インタビュー回答\n${input.interviewAnswers.map((qa) => `Q: ${qa.question}\nA: ${qa.answer}`).join("\n\n")}\n\n**これらの回答内容を記事に盛り込んでください**`
+      ? `\n\n## 追加情報（参考のみ・記事には直接掲載しないこと）\n以下はより良い記事を書くための補足情報です。Q&A形式や「質問への回答」などの見出しとして記事に掲載せず、内容を自然な文体の記事本文に活かしてください。\n${input.interviewAnswers.map((qa) => `- ${qa.question}：${qa.answer}`).join("\n")}`
       : "";
 
   content.push({
