@@ -140,7 +140,7 @@ app.post("/submit/interview", async (c) => {
 
     // Save to KV with 1 hour expiration
     await c.env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(sessionData), {
-      expirationTtl: 3600,
+      expirationTtl: 86400, // 24時間（送信成功時に明示削除）
     });
 
     // Generate interview questions
