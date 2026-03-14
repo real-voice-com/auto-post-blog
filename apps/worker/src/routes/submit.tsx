@@ -262,7 +262,13 @@ app.post("/submit/generate", async (c) => {
     // Fetch Amazon OGP info
     const rawAmazonLinks = sessionData.amazonLinks || [];
     const amazonProductInfos: AmazonProductInfo[] = await Promise.all(
-      rawAmazonLinks.map(link => fetchAmazonOGP(link.url, link.label))
+      rawAmazonLinks.map(link => fetchAmazonOGP(
+        link.url,
+        link.label,
+        c.env.AMAZON_ACCESS_KEY,
+        c.env.AMAZON_SECRET_KEY,
+        c.env.AMAZON_ASSOCIATE_TAG,
+      ))
     );
 
     // Generate article
