@@ -139,9 +139,8 @@ app.post("/submit/interview", async (c) => {
     }
 
     // Save to KV with 1 hour expiration
-    await c.env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(sessionData), {
-      expirationTtl: 86400, // 24時間（送信成功時に明示削除）
-    });
+    // TTLなし（無期限）— 送信成功時に明示削除
+    await c.env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(sessionData));
 
     // Generate interview questions
     const genreConfig = GENRES[genre as Genre];
