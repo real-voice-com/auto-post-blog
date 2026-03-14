@@ -100,6 +100,20 @@ export const PostForm: FC = () => {
         </div>
       </fieldset>
 
+      {/* Amazonリンク */}
+      <fieldset>
+        <legend>Amazonリンク (任意)</legend>
+        <div id="amazon-rows">
+          <div class="amazon-row">
+            <input type="text" name="amazon_label[]" placeholder="商品名（例：ELECOM モニターライト）" />
+            <input type="url" name="amazon_url[]" placeholder="https://amzn.to/XXXXXXX" />
+          </div>
+        </div>
+        <button type="button" class="btn-secondary" onclick="addAmazonRow()">
+          + Amazonリンクを追加
+        </button>
+      </fieldset>
+
       {/* 画像アップロード */}
       <div class="field">
         <label for="images">画像を追加 (自動圧縮: 各400KB以下)</label>

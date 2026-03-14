@@ -13,6 +13,8 @@ import {
   generateInterviewQuestions,
   type InterviewQuestion,
 } from "../services/interviewer";
+import { fetchAmazonOGP } from '../services/amazon-ogp';
+import type { AmazonProductInfo } from '../services/amazon-ogp';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -43,7 +45,16 @@ app.post("/submit/interview", async (c) => {
     const sessionId = crypto.randomUUID();
 
     // Save all form data to KV
-    const sessionData: Record<string, unknown> = {
+    const sessionData: {
+      genre: string;
+      date: string;
+      titleDraft: string;
+      text: string;
+      rating: number;
+      expenses: Record<string, unknown>;
+      images: unknown[];
+      amazonLinks?: Array<{url: string; label: string}>;
+    } = {
       genre,
       date,
       titleDraft,
@@ -110,6 +121,23 @@ app.post("/submit/interview", async (c) => {
     }
     sessionData.images = images;
 
+    // Parse Amazon links
+    const rawAmazonLabels = body["amazon_label[]"];
+    const rawAmazonUrls = body["amazon_url[]"];
+    const amazonLabels = Array.isArray(rawAmazonLabels) ? rawAmazonLabels : rawAmazonLabels ? [rawAmazonLabels] : [];
+    const amazonUrls = Array.isArray(rawAmazonUrls) ? rawAmazonUrls : rawAmazonUrls ? [rawAmazonUrls] : [];
+
+    const amazonLinks = amazonUrls
+      .map((url, i) => ({
+        url: typeof url === 'string' ? url.trim() : '',
+        label: typeof amazonLabels[i] === 'string' ? (amazonLabels[i] as string).trim() : '',
+      }))
+      .filter(link => link.url.length > 0);
+
+    if (amazonLinks.length > 0) {
+      sessionData.amazonLinks = amazonLinks;
+    }
+
     // Save to KV with 1 hour expiration
     await c.env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(sessionData), {
       expirationTtl: 3600,
@@ -161,6 +189,7 @@ app.post("/submit/generate", async (c) => {
       rating: number;
       expenses: Expenses;
       images: Array<{ filename: string; contentType: string; data: string }>;
+      amazonLinks?: Array<{url: string; label: string}>;
     };
 
     // Parse interview answers
@@ -230,6 +259,12 @@ app.post("/submit/generate", async (c) => {
       });
     }
 
+    // Fetch Amazon OGP info
+    const rawAmazonLinks = sessionData.amazonLinks || [];
+    const amazonProductInfos: AmazonProductInfo[] = await Promise.all(
+      rawAmazonLinks.map(link => fetchAmazonOGP(link.url, link.label))
+    );
+
     // Generate article
     const genreConfig = GENRES[sessionData.genre as Genre];
     const article = await generateArticle(c.env.AI, {
@@ -242,6 +277,7 @@ app.post("/submit/generate", async (c) => {
       images,
       tone: genreConfig.tone,
       interviewAnswers: interviewAnswers.length > 0 ? interviewAnswers : undefined,
+      amazonLinks: amazonProductInfos.length > 0 ? amazonProductInfos : undefined,
     });
 
     // Publish to GitHub

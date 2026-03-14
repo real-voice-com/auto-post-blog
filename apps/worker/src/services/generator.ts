@@ -5,6 +5,7 @@ import type {
   SubmitImage,
   GeneratedArticle,
 } from "@auto-post-blog/shared";
+import type { AmazonProductInfo } from './amazon-ogp';
 
 const MODEL = "@cf/meta/llama-4-scout-17b-16e-instruct";
 
@@ -23,6 +24,7 @@ interface GenerateInput {
   images: SubmitImage[];
   tone: Tone;
   interviewAnswers?: InterviewAnswer[];
+  amazonLinks?: AmazonProductInfo[];
 }
 
 function buildSystemPrompt(tone: Tone, genre: Genre): string {
@@ -256,5 +258,16 @@ export async function generateArticle(
     `$1"${slug}"`
   );
 
-  return { markdown: updatedMarkdown, slug };
+  // Amazon linksをfrontmatterに追加
+  let finalMarkdown = updatedMarkdown;
+  if (input.amazonLinks && input.amazonLinks.length > 0) {
+    const linksYaml = input.amazonLinks.map(link =>
+      `  - url: "${link.url}"\n    title: "${link.title.replace(/"/g, '\\"')}"\n    image: "${link.image || ''}"\n    label: "${link.label.replace(/"/g, '\\"')}"`
+    ).join('\n');
+    finalMarkdown = updatedMarkdown.replace(
+      /^---\n/,
+      `---\namazonLinks:\n${linksYaml}\n`
+    );
+  }
+  return { markdown: finalMarkdown, slug };
 }

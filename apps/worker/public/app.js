@@ -1,3 +1,22 @@
+// === Amazon Link Management ===
+
+// Amazonリンク行を追加
+function addAmazonRow() {
+  const container = document.getElementById("amazon-rows");
+  const row = document.createElement("div");
+  row.className = "amazon-row";
+  row.innerHTML =
+    '<input type="text" name="amazon_label[]" placeholder="商品名（例：ELECOM モニターライト）" />' +
+    '<input type="url" name="amazon_url[]" placeholder="https://amzn.to/XXXXXXX" />' +
+    '<button type="button" class="btn-remove" onclick="removeAmazonRow(this)">削除</button>';
+  container.appendChild(row);
+}
+
+// Amazonリンク行を削除
+function removeAmazonRow(btn) {
+  btn.parentElement.remove();
+}
+
 // === Expense Management (must be defined first) ===
 
 // 費用行を追加
