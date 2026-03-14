@@ -205,22 +205,26 @@ document.body.addEventListener("htmx:afterSwap", function (event) {
     if (responseText.includes("success")) {
       debugLog("✓ 記事生成成功");
       localStorage.removeItem(STORAGE_KEY);
+      // URLをクリア
+      history.replaceState(null, "", "/");
       // Keep button disabled on success
     } else if (responseText.includes("error")) {
       debugLog("✗ エラーが発生しました");
-      // Re-enable button on error
       if (submitButton) {
         submitButton.disabled = false;
       }
     } else {
       debugLog("✓ インタビュー質問を表示しました");
-      // Interview questions - re-enable button
+      // セッションIDをURLに保存（リロード復元用）
+      const sessionInput = document.querySelector('input[name="sessionId"]');
+      if (sessionInput && sessionInput.value) {
+        history.replaceState(null, "", "/?session=" + sessionInput.value);
+      }
       if (submitButton) {
         submitButton.disabled = false;
       }
     }
   } else if (submitButton) {
-    // Re-enable on any other case (network error, etc)
     submitButton.disabled = false;
   }
 });

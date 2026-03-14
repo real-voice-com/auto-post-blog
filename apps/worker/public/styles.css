@@ -389,6 +389,16 @@ textarea {
 }
 
 /* Interview section */
+.interview-restored-notice {
+  margin-bottom: 1rem;
+  padding: 0.6rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  color: #166534;
+  font-size: 0.9rem;
+}
+
 .interview-section {
   margin-top: 1rem;
   padding: 1.5rem;

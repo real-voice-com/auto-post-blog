@@ -1,7 +1,13 @@
 import type { FC } from "hono/jsx";
+import type { Child } from "hono/jsx";
 import { GENRES } from "@auto-post-blog/shared";
 
-export const PostForm: FC = () => {
+interface PostFormProps {
+  restoredSessionId?: string;
+  restoredInterview?: Child;
+}
+
+export const PostForm: FC<PostFormProps> = ({ restoredInterview }) => {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -139,7 +145,7 @@ export const PostForm: FC = () => {
         id="debug-log"
         style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; display: none;"
       />
-      <div id="result" />
+      <div id="result">{restoredInterview}</div>
     </form>
   );
 };
